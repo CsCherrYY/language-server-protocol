@@ -1927,6 +1927,13 @@ export interface TextDocumentClientCapabilities {
 	 * @since 3.16.0
 	 */
 	moniker?: MonikerClientCapabilities;
+
+	/**
+	 * Capabilities specific to the various type hierarchy requests.
+	 *
+	 * @since 3.17.0
+	 */
+	typeHierarchy?: TypeHierarchyClientCapabilities;
 }
 ```
 
@@ -2418,6 +2425,14 @@ interface ServerCapabilities {
 			willDelete?: FileOperationRegistrationOptions;
 		}
 	}
+
+	/**
+	 * The server provides type hierarchy support.
+	 *
+	 * @since 3.16.0
+	 */
+	typeHierarchyProvider?: boolean | TypeHierarchyOptions
+		| TypeHierarchyRegistrationOptions;
 
 	/**
 	 * Experimental server capabilities.
@@ -8172,6 +8187,165 @@ export interface Moniker {
 	kind?: MonikerKind;
 }
 ```
+
+#### <a href="#textDocument_prepareTypeHierarchy" name="textDocument_prepareTypeHierarchy" class="anchor">Prepare Type Hierarchy Request (:leftwards_arrow_with_hook:)</a>
+
+> *Since version 3.17.0*
+
+The type hierarchy request is sent from the client to the server to return a type hierarchy for the language element of given text document positions. The type hierarchy requests are executed in two steps:
+
+  1. first a type hierarchy item is resolved for the given text document position
+  1. for a type hierarchy item is resolved.
+
+_Client Capability_:
+
+* property name (optional): `textDocument.typeHierarchy`
+* property type: `TypeHierarchyClientCapabilities` defined as follows:
+
+```typescript
+interface TypeHierarchyClientCapabilities {
+	/**
+	 * Whether implementation supports dynamic registration. If this is set to
+	 * `true` the client supports the new `(TextDocumentRegistrationOptions &
+	 * StaticRegistrationOptions)` return value for the corresponding server
+	 * capability as well.
+	 */
+	dynamicRegistration?: boolean;
+}
+```
+
+_Server Capability_:
+
+* property name (optional): `typeHierarchyProvider`
+* property type: `boolean | TypeHierarchyOptions | TypeHierarchyRegistrationOptions` where `TypeHierarchyOptions` is defined as follows:
+
+```typescript
+export interface TypeHierarchyOptions extends WorkDoneProgressOptions {
+}
+```
+
+_Registration Options_: `TypeHierarchyRegistrationOptions` defined as follows:
+
+```typescript
+export interface TypeHierarchyRegistrationOptions extends
+	TextDocumentRegistrationOptions, TypeHierarchyOptions,
+	StaticRegistrationOptions {
+}
+```
+
+_Request_:
+
+* method: 'textDocument/prepareTypeHierarchy'
+* params: `TypeHierarchyPrepareParams` defined as follows:
+
+```typescript
+export interface TypeHierarchyPrepareParams extends TextDocumentPositionParams,
+	WorkDoneProgressParams {
+}
+```
+
+_Response_:
+
+* result: `TypeHierarchyItem[] | null` defined as follows:
+
+```typescript
+export interface TypeHierarchyItem {
+	/**
+	 * The name of this item.
+	 */
+	name: string;
+
+	/**
+	 * The kind of this item.
+	 */
+	kind: SymbolKind;
+
+	/**
+	 * Tags for this item.
+	 */
+	tags?: SymbolTag[];
+
+	/**
+	 * More detail for this item, e.g. the signature of a function.
+	 */
+	detail?: string;
+
+	/**
+	 * The resource identifier of this item.
+	 */
+	uri: DocumentUri;
+
+	/**
+	 * The range enclosing this symbol not including leading/trailing whitespace
+	 * but everything else, e.g. comments and code.
+	 */
+	range?: Range;
+
+	/**
+	 * The range that should be selected and revealed when this symbol is being
+	 * picked, e.g. the name of a function. Must be contained by the
+	 * [`range`](#TypeHierarchyItem.range).
+	 */
+	selectionRange: Range;
+
+	/**
+	 * A data entry field that is preserved between a call hierarchy prepare and
+	 * incoming calls or outgoing calls requests.
+	 */
+	data?: unknown;
+}
+```
+
+* error: code and message set in case an exception happens during the 'textDocument/prepareTypeHierarchy' request
+
+#### <a href="#typeHierarchy_superTypes" name="typeHierarchy_superTypes" class="anchor">Type Hierarchy Super Types (:leftwards_arrow_with_hook:)</a>
+
+> *Since version 3.17.0*
+
+The request is sent from the client to the server to resolve super types for a given type hierarchy item. The request doesn't define its own client and server capabilities. It is only issued if a server registers for the [`textDocument/prepareTypeHierarchy` request](#textDocument_prepareTypeHierarchy).
+
+_Request_:
+
+* method: 'typeHierarchy/superTypes'
+* params: `TypeHierarchySuperTypes` defined as follows:
+
+```typescript
+export interface TypeHierarchySuperTypesParams extends
+	WorkDoneProgressParams, PartialResultParams {
+	item: TypeHierarchyItem;
+}
+```
+
+_Response_:
+
+* result: `TypeHierarchyItem[] | null`
+* partial result: `TypeHierarchyItem[]`
+* error: code and message set in case an exception happens during the 'typeHierarchy/superTypes' request
+
+#### <a href="#typeHierarchy_subTypes" name="typeHierarchy_subTypes" class="anchor">Type Hierarchy Sub Types (:leftwards_arrow_with_hook:)</a>
+
+> *Since version 3.17.0*
+
+The request is sent from the client to the server to resolve sub types for a given type hierarchy item. The request doesn't define its own client and server capabilities. It is only issued if a server registers for the [`textDocument/prepareTypeHierarchy` request](#textDocument_prepareTypeHierarchy).
+
+_Request_:
+
+* method: 'typeHierarchy/subTypes'
+* params: `TypeHierarchySubTypesParams` defined as follows:
+
+```typescript
+export interface TypeHierarchySubTypesParams extends
+	WorkDoneProgressParams, PartialResultParams {
+	item: TypeHierarchyItem;
+}
+```
+
+_Response_:
+
+* result: `TypeHierarchyItem[] | null` defined as follows:
+* partial result: `TypeHierarchyItem[]`
+* error: code and message set in case an exception happens during the 'typeHierarchy/subTypes' request
+
 
 ##### Notes
 
