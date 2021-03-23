@@ -2429,7 +2429,7 @@ interface ServerCapabilities {
 	/**
 	 * The server provides type hierarchy support.
 	 *
-	 * @since 3.16.0
+	 * @since 3.17.0
 	 */
 	typeHierarchyProvider?: boolean | TypeHierarchyOptions
 		| TypeHierarchyRegistrationOptions;
@@ -8195,7 +8195,16 @@ export interface Moniker {
 The type hierarchy request is sent from the client to the server to return a type hierarchy for the language element of given text document positions. The type hierarchy requests are executed in two steps:
 
   1. first a type hierarchy item is resolved for the given text document position
-  1. for a type hierarchy item is resolved.
+  1. the client send the type hierarchy item and the `TypeHierarchyDirection` to the server to resolve its supertypes or subtypes.
+
+  * `TypeHierarchyDirection` defined as follows:
+
+```typescript
+export enum TypeHierarchyDirection {
+	supertype,
+	subtype,
+}
+```
 
 _Client Capability_:
 
@@ -8246,7 +8255,7 @@ export interface TypeHierarchyPrepareParams extends TextDocumentPositionParams,
 
 _Response_:
 
-* result: `TypeHierarchyItem[] | null` defined as follows:
+* result: `TypeHierarchyItem | null` defined as follows:
 
 ```typescript
 export interface TypeHierarchyItem {
@@ -8298,54 +8307,29 @@ export interface TypeHierarchyItem {
 
 * error: code and message set in case an exception happens during the 'textDocument/prepareTypeHierarchy' request
 
-#### <a href="#typeHierarchy_superTypes" name="typeHierarchy_superTypes" class="anchor">Type Hierarchy Super Types (:leftwards_arrow_with_hook:)</a>
+#### <a href="#resolve_typeHierarchy" name="resolve_typeHierarchy" class="anchor">Resolve Type Hierarchy (:leftwards_arrow_with_hook:)</a>
 
 > *Since version 3.17.0*
 
-The request is sent from the client to the server to resolve super types for a given type hierarchy item. The request doesn't define its own client and server capabilities. It is only issued if a server registers for the [`textDocument/prepareTypeHierarchy` request](#textDocument_prepareTypeHierarchy).
+The request is sent from the client to the server to resolve supertypes or subtypes for a given type hierarchy item. The request doesn't define its own client and server capabilities. It is only issued if a server registers for the [`textDocument/prepareTypeHierarchy` request](#textDocument_prepareTypeHierarchy).
 
 _Request_:
 
-* method: 'typeHierarchy/superTypes'
-* params: `TypeHierarchySuperTypes` defined as follows:
+* method: 'typeHierarchy/resolveTypeHierarchy'
+* params: `ResolveTypeHierarchyParams` defined as follows:
 
 ```typescript
-export interface TypeHierarchySuperTypesParams extends
+export interface ResolveTypeHierarchyParams extends
 	WorkDoneProgressParams, PartialResultParams {
 	item: TypeHierarchyItem;
+	direction: TypeHierarchyDirection;
 }
 ```
-
 _Response_:
 
 * result: `TypeHierarchyItem[] | null`
 * partial result: `TypeHierarchyItem[]`
-* error: code and message set in case an exception happens during the 'typeHierarchy/superTypes' request
-
-#### <a href="#typeHierarchy_subTypes" name="typeHierarchy_subTypes" class="anchor">Type Hierarchy Sub Types (:leftwards_arrow_with_hook:)</a>
-
-> *Since version 3.17.0*
-
-The request is sent from the client to the server to resolve sub types for a given type hierarchy item. The request doesn't define its own client and server capabilities. It is only issued if a server registers for the [`textDocument/prepareTypeHierarchy` request](#textDocument_prepareTypeHierarchy).
-
-_Request_:
-
-* method: 'typeHierarchy/subTypes'
-* params: `TypeHierarchySubTypesParams` defined as follows:
-
-```typescript
-export interface TypeHierarchySubTypesParams extends
-	WorkDoneProgressParams, PartialResultParams {
-	item: TypeHierarchyItem;
-}
-```
-
-_Response_:
-
-* result: `TypeHierarchyItem[] | null` defined as follows:
-* partial result: `TypeHierarchyItem[]`
-* error: code and message set in case an exception happens during the 'typeHierarchy/subTypes' request
-
+* error: code and message set in case an exception happens during the 'typeHierarchy/resolveTypeHierarchy' request
 
 ##### Notes
 
