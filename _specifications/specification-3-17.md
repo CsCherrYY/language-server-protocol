@@ -8195,16 +8195,7 @@ export interface Moniker {
 The type hierarchy request is sent from the client to the server to return a type hierarchy for the language element of given text document positions. The type hierarchy requests are executed in two steps:
 
   1. first a type hierarchy item is resolved for the given text document position
-  1. the client send the type hierarchy item and the `TypeHierarchyDirection` to the server to resolve its supertypes or subtypes.
-
-  * `TypeHierarchyDirection` defined as follows:
-
-```typescript
-export enum TypeHierarchyDirection {
-	parents,
-	children,
-}
-```
+  1. the client request the server to resolve the given item's supertypes or subtypes.
 
 _Client Capability_:
 
@@ -8323,6 +8314,14 @@ export interface ResolveTypeHierarchyParams extends
 	WorkDoneProgressParams, PartialResultParams {
 	item: TypeHierarchyItem;
 	direction: TypeHierarchyDirection;
+}
+```
+  * `TypeHierarchyDirection` defined as follows:
+
+```typescript
+export enum TypeHierarchyDirection {
+	parents,
+	children,
 }
 ```
 _Response_:
