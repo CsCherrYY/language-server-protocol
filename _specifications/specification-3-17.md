@@ -8201,8 +8201,8 @@ The type hierarchy request is sent from the client to the server to return a typ
 
 ```typescript
 export enum TypeHierarchyDirection {
-	supertype,
-	subtype,
+	parents,
+	children,
 }
 ```
 
