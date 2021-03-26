@@ -8306,7 +8306,7 @@ The request is sent from the client to the server to resolve supertypes or subty
 
 _Request_:
 
-* method: 'typeHierarchy/resolveTypeHierarchy'
+* method: 'typeHierarchy/resolve'
 * params: `ResolveTypeHierarchyParams` defined as follows:
 
 ```typescript
@@ -8320,15 +8320,15 @@ export interface ResolveTypeHierarchyParams extends
 
 ```typescript
 export enum TypeHierarchyDirection {
-	parents,
-	children,
+	supertype,
+	subtype,
 }
 ```
 _Response_:
 
 * result: `TypeHierarchyItem[] | null`
 * partial result: `TypeHierarchyItem[]`
-* error: code and message set in case an exception happens during the 'typeHierarchy/resolveTypeHierarchy' request
+* error: code and message set in case an exception happens during the 'typeHierarchy/resolve' request
 
 ##### Notes
 
