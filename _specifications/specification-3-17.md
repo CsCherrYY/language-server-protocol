@@ -8195,7 +8195,9 @@ export interface Moniker {
 The type hierarchy request is sent from the client to the server to return a type hierarchy for the language element of given text document positions. The type hierarchy requests are executed in two steps:
 
   1. first a type hierarchy item is prepared for the given text document position
-  1. the client request the server to resolve the given item with its supertypes or/and subtypes
+  1. the client request the server to resolve the given item with its supertypes or subtypes
+
+During the above two steps, the client could assign the `token` property of params in the `textDocument/prepareTypeHierarchy` and its corresponding `typeHierarchy/supertypes` or `typeHierarchy/subtypes` request. A `textDocument/prepareTypeHierarchy` has a unique `token`, which should keep constant among requests in the same type hierarchy view to help indicate some preserved data in the server.
 
 _Client Capability_:
 
@@ -8221,10 +8223,6 @@ _Server Capability_:
 
 ```typescript
 export interface TypeHierarchyOptions extends WorkDoneProgressOptions {
-	/**
-	 * The server has support for supporting inheritance tree.
-	 */
-	inheritanceTreeSuppport?: boolean;
 }
 ```
 
@@ -8245,6 +8243,7 @@ _Request_:
 ```typescript
 export interface TypeHierarchyPrepareParams extends TextDocumentPositionParams,
 	WorkDoneProgressParams {
+	token?: ProgressToken;
 }
 ```
 
@@ -8283,7 +8282,7 @@ export interface TypeHierarchyItem {
 	 * The range enclosing this symbol not including leading/trailing whitespace
 	 * but everything else, e.g. comments and code.
 	 */
-	range?: Range;
+	range: Range;
 
 	/**
 	 * The range that should be selected and revealed when this symbol is being
@@ -8293,20 +8292,8 @@ export interface TypeHierarchyItem {
 	selectionRange: Range;
 
 	/**
-	 * Indicates if this item has supertypes. When `undefined` the supertypes
-	 * of this item have not been resolved yet.
-	 */
-	hasSupertypes?: boolean;
-
-	/**
-	 * Indicates if this item has subtypes. When `undefined` the subtypes
-	 * of this item have not been resolved yet.
-	 */
-	hasSubtypes?: boolean;
-
-	/**
-	 * A data entry field that is preserved between a call hierarchy prepare and
-	 * incoming calls or outgoing calls requests.
+	 * A data entry field that is preserved between a type hierarchy prepare and
+	 * supertypes or subtypes requests.
 	 */
 	data?: unknown;
 }
@@ -8329,6 +8316,7 @@ _Request_:
 export interface TypeHierarchySupertypesParams extends
 	WorkDoneProgressParams, PartialResultParams {
 	item: TypeHierarchyItem;
+	token?: ProgressToken;
 }
 ```
 _Response_:
@@ -8352,6 +8340,7 @@ _Request_:
 export interface TypeHierarchySubtypesParams extends
 	WorkDoneProgressParams, PartialResultParams {
 	item: TypeHierarchyItem;
+	token?: ProgressToken;
 }
 ```
 _Response_:
@@ -8359,39 +8348,6 @@ _Response_:
 * result: `TypeHierarchyItem[] | null`
 * partial result: `TypeHierarchyItem[]`
 * error: code and message set in case an exception happens during the 'typeHierarchy/subtypes' request
-
-#### <a href="#typeHierarchy_inheritanceTree" name="typeHierarchy_inheritanceTree" class="anchor">Type Hierarchy Inheritance Tree(:leftwards_arrow_with_hook:)</a>
-
-> *Since version 3.17.0*
-
-The request is sent from the client to the server to resolve the inheritance tree for a given type hierarchy item. The response result of this request is `TreeItem<T>`.
-* `TreeItem<T>` defined as follows:
-```typescript
-export interface TreeItem<T> {
-	data: T;
-	/**
-	 * The children of this TreeItem. When `undefined` the children have not been resolved yet.
-	 */
-	children?: TreeItem<T>[];
-}
-```
-The result represents the inheritance tree related to the specified type hierarchy item. Only single inheritance can be represented this way. The root type is expected as the return value. The request doesn't define its own client and server capabilities. It is only issued if a server has the capability for `TypeHierarchyOptions/inheritanceTreeSuppport`.
-
-_Request_:
-
-* method: 'typeHierarchy/inheritanceTree'
-* params: `TypeHierarchyInheritanceTreeParams` defined as follows:
-
-```typescript
-export interface TypeHierarchyInheritanceTreeParams extends
-	WorkDoneProgressParams {
-	item: TypeHierarchyItem;
-}
-```
-_Response_:
-
-* result: `TreeItem<TypeHierarchyItem> | null`
-* error: code and message set in case an exception happens during the 'typeHierarchy/resolve' request
 
 ##### Notes
 
