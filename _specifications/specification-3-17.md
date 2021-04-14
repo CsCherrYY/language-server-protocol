@@ -8243,7 +8243,6 @@ _Request_:
 ```typescript
 export interface TypeHierarchyPrepareParams extends TextDocumentPositionParams,
 	WorkDoneProgressParams {
-	token?: ProgressToken;
 }
 ```
 
@@ -8316,7 +8315,6 @@ _Request_:
 export interface TypeHierarchySupertypesParams extends
 	WorkDoneProgressParams, PartialResultParams {
 	item: TypeHierarchyItem;
-	token?: ProgressToken;
 }
 ```
 _Response_:
@@ -8340,7 +8338,6 @@ _Request_:
 export interface TypeHierarchySubtypesParams extends
 	WorkDoneProgressParams, PartialResultParams {
 	item: TypeHierarchyItem;
-	token?: ProgressToken;
 }
 ```
 _Response_:
